@@ -19,7 +19,7 @@ MAX_REG_COUNT_SM12 := 0
 MAX_REG_COUNT_SM11 := 0
 
 # To compile 32-bit binaries on a 64-bit machine, set this to 1.
-COMPILE_32 := 1
+COMPILE_32 := 0
 
 ######################################################################
 # Compiler flags
@@ -104,7 +104,7 @@ endif
 NVCC_FLAGS_SM20 += -keep # -deviceemu
 
 $(PROG_SM20): $(PROG_SM20).cu_o gpumcml_io.o
-	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart -l$(LIBCUTIL_NAME)
+	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart
 
 $(PROG_SM20).cu_o: $(CU_SRCS)
 	-$(NVCC) $(NVCC_FLAGS_SM20) -o $@ -c $<
