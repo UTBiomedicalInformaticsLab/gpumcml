@@ -41,8 +41,8 @@ else
     LIBCUDART_DIR := -L$(CUDA_INSTALL_ROOT)/lib
     LIBCUTIL_NAME := cutil_i386
   else
-    LIBCUDART_DIR := -L$(CUDA_INSTALL_ROOT)/lib64
-    LIBCUTIL_NAME := cutil_x86_64
+    LIBCUDART_DIR := -L$(CUDA_INSTALL_ROOT)/lib63
+    LIBCUTIL_NAME := cutil-linux
   endif
 endif
 
@@ -56,7 +56,7 @@ else
 endif
 
 CFLAGS := -Wall -O3
-LDFLAGS := $(LIBCUDART_DIR) -L$(LIBCUTIL_DIR)
+LDFLAGS := $(LIBCUDART_DIR) -L$(LIBCUTIL_DIR) -L$(/home/acs3235/gpumcml/gpumcml/simple)
 
 NVCC_FLAGS := -I$(CUDA_INSTALL_ROOT)/include -I$(LIBCUTIL_DIR)
 NVCC_FLAGS += -O3 -DUNIX -use_fast_math
@@ -104,73 +104,13 @@ endif
 NVCC_FLAGS_SM20 += -keep # -deviceemu
 
 $(PROG_SM20): $(PROG_SM20).cu_o gpumcml_io.o
-	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart
+	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart -l$(LIBCUTIL_NAME)
 
 $(PROG_SM20).cu_o: $(CU_SRCS)
 	-$(NVCC) $(NVCC_FLAGS_SM20) -o $@ -c $<
 
 clean_sm_20:
-	-$(NVCC) $(NVCC_FLAGS_SM20) -o $(PROG_SM20).cu_o -c $(PROG_BASE)_main.cu -clean
-
-######################################################################
-# GPU code compilation rules for Compute Capability 1.3
-######################################################################
-
-GENCODE_SM13 := -gencode arch=compute_13,code=\"sm_13,compute_13\"
-NVCC_FLAGS_SM13 := $(NVCC_FLAGS) $(GENCODE_SM13) -D__CUDA_ARCH__=130
-ifneq "$(strip $(MAX_REG_COUNT_SM13))" "0"
-NVCC_FLAGS_SM13 += -maxrregcount $(MAX_REG_COUNT_SM13)
-endif
-NVCC_FLAGS_SM13 += #-keep # -deviceemu
-
-$(PROG_SM13): $(PROG_SM13).cu_o gpumcml_io.o
-	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart -l$(LIBCUTIL_NAME)
-
-$(PROG_SM13).cu_o: $(CU_SRCS)
-	-$(NVCC) $(NVCC_FLAGS_SM13) -o $@ -c $<
-
-clean_sm_13:
-	-$(NVCC) $(NVCC_FLAGS_SM13) -o $(PROG_SM13).cu_o -c $(PROG_BASE)_main.cu -clean
-
-######################################################################
-# GPU code compilation rules for Compute Capability 1.2
-######################################################################
-
-GENCODE_SM12 := -gencode arch=compute_12,code=\"sm_12,compute_12\"
-NVCC_FLAGS_SM12 := $(NVCC_FLAGS) $(GENCODE_SM12) -D__CUDA_ARCH__=120
-ifneq "$(strip $(MAX_REG_COUNT_SM12))" "0"
-NVCC_FLAGS_SM12 += -maxrregcount $(MAX_REG_COUNT_SM12)
-endif
-NVCC_FLAGS_SM12 += #-keep # -deviceemu
-
-$(PROG_SM12): $(PROG_SM12).cu_o gpumcml_io.o
-	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart -l$(LIBCUTIL_NAME)
-
-$(PROG_SM12).cu_o: $(CU_SRCS)
-	-$(NVCC) $(NVCC_FLAGS_SM12) -o $@ -c $<
-
-clean_sm_12:
-	-$(NVCC) $(NVCC_FLAGS_SM12) -o $(PROG_SM12).cu_o -c $(PROG_BASE)_main.cu -clean
-
-######################################################################
-# GPU code compilation rules for Compute Capability 1.1
-######################################################################
-
-GENCODE_SM11 := -gencode arch=compute_11,code=\"sm_11,compute_11\"
-NVCC_FLAGS_SM11 := $(NVCC_FLAGS) $(GENCODE_SM11) -D__CUDA_ARCH__=110
-ifneq "$(strip $(MAX_REG_COUNT_SM11))" "0"
-NVCC_FLAGS_SM11 += -maxrregcount $(MAX_REG_COUNT_SM11)
-endif
-NVCC_FLAGS_SM11 += #-keep # -deviceemu
-
-$(PROG_SM11): $(PROG_SM11).cu_o gpumcml_io.o
-	-$(GCC) $(LDFLAGS) -o $@ $^ -lcudart -l$(LIBCUTIL_NAME)
-
-$(PROG_SM11).cu_o: $(CU_SRCS)
-	-$(NVCC) $(NVCC_FLAGS_SM11) -o $@ -c $<
-
-clean_sm_11:
-	-$(NVCC) $(NVCC_FLAGS_SM11) -o $(PROG_SM11).cu_o -c $(PROG_BASE)_main.cu -clean
+	-$(NVCC) $(NVCC_FLAGS_SM20) -L(/home/acs3235/gpumcml/gpumcml/simple)  -o $(PROG_SM20).cu_o -c $(PROG_BASE)_main.cu -clean
 
 ######################################################################
 # C code compilation rules
